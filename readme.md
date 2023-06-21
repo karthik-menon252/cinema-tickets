@@ -1,0 +1,1 @@
+Ticketing service for cinema - Working implentation of TicketService
