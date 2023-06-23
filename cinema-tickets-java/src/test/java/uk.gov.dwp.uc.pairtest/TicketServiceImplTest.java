@@ -31,6 +31,7 @@ public class TicketServiceImplTest {
     @Mock
     private SeatReservationService seatReservationService;
 
+
     @Test
     public void testPurchaseTicketsForNullAccountId() {
         thrown.expect(InvalidPurchaseException.class);
@@ -60,8 +61,6 @@ public class TicketServiceImplTest {
         thrown.expectMessage("Ticket request cannot be null or empty");
 
         ticketService.purchaseTickets(1L);
-
-
     }
 
     @Test
@@ -71,14 +70,15 @@ public class TicketServiceImplTest {
 
         ticketService.purchaseTickets(1L, null);
     }
-    // TODO
-    /*@Test
-    public void testPurchaseTicketsWithoutRequestWithTicketTypeNull() {
-        thrown.expect(InvalidPurchaseException.class);
-        thrown.expectMessage("Ticket type must be one of ADULT, CHILD, INFANT");
 
-        ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 2), new TicketTypeRequest(null, 3));
-    }*/
+    @Test
+    public void testPurchaseTicketsWithoutRequestWithTicketTypeNullAndCount() {
+        thrown.expect(InvalidPurchaseException.class);
+        thrown.expectMessage("Invalid number of tickets: cannot be less than 0");
+        thrown.expectMessage("Invalid ticket type: must be one of [ADULT, CHILD, INFANT]");
+
+        ticketService.purchaseTickets(1L, new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 2), new TicketTypeRequest(null, 3), new TicketTypeRequest(TicketTypeRequest.Type.ADULT, -1));
+    }
 
     @Test
     public void testPurchaseTicketsWithValidAdultTicketCount() {
@@ -108,7 +108,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithInvalidAdultAndInfantTickets(){
+    public void testPurchaseTicketWithInvalidAdultAndInfantTickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("Number of adults less than infants");
 
@@ -120,7 +120,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithInvalidAdultAndChildTickets(){
+    public void testPurchaseTicketWithInvalidAdultAndChildTickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("Child tickets cannot be purchased without adult ticket");
 
@@ -132,7 +132,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithOnlyChildTickets(){
+    public void testPurchaseTicketWithOnlyChildTickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("Child tickets cannot be purchased without adult ticket");
 
@@ -143,7 +143,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithNoAdultTickets(){
+    public void testPurchaseTicketWithNoAdultTickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("No adult tickets purchased");
 
@@ -154,7 +154,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithOnlyInfantTickets(){
+    public void testPurchaseTicketWithOnlyInfantTickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("Number of adults less than infants");
 
@@ -165,7 +165,7 @@ public class TicketServiceImplTest {
     }
 
     @Test
-    public void testPurchaseTicketWithMoreThan20Tickets(){
+    public void testPurchaseTicketWithMoreThan20Tickets() {
         thrown.expect(InvalidPurchaseException.class);
         thrown.expectMessage("Exceeded limit on number of tickets");
 

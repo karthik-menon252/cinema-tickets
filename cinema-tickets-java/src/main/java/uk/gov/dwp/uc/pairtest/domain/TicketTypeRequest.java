@@ -2,18 +2,20 @@ package uk.gov.dwp.uc.pairtest.domain;
 
 import jakarta.validation.constraints.Min;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
-import validator.TicketType;
+import constraints.annotations.TicketType;
+
+
+
 
 /**
  * Immutable Object
  */
-
 public final class TicketTypeRequest {
 
-    @Min(value = 0, message = "number of tickets cannot be less than 0")
+    @Min(value = 0, message = "Invalid number of tickets: cannot be less than {value}")
     private final int noOfTickets;
 
-    @TicketType(oneof = {Type.ADULT, Type.CHILD, Type.INFANT})
+    @TicketType(oneOf = {Type.ADULT, Type.CHILD, Type.INFANT})
     private final Type type;
 
     public TicketTypeRequest(Type type, int noOfTickets) {
