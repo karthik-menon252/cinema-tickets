@@ -2,7 +2,6 @@ package uk.gov.dwp.uc.pairtest;
 
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
@@ -14,7 +13,10 @@ import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 import constraints.ValidWrapper;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -22,10 +24,13 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class TicketServiceImpl implements TicketService {
+    private static final int ADULT_TICKET_PRICE = 20;
+    private static final int CHILD_TICKET_PRICE = 10;
+    private static final int INFANT_TICKET_PRICE = 0;
+    private static final int MAX_TICKET_COUNT = 20;
     /**
      * Should only have private methods other than the one below.
      */
-
     @Autowired
     private TicketPaymentService ticketPaymentService;
     @Autowired
@@ -48,7 +53,9 @@ public class TicketServiceImpl implements TicketService {
         int infantCount = getTicketCount(ticketMap, TicketTypeRequest.Type.INFANT);
         validateTicketCounts(adultCount, childCount, infantCount);
         seatReservationService.reserveSeat(accountId, adultCount + childCount);
-        ticketPaymentService.makePayment(accountId, adultCount * 20 + childCount * 10);
+        ticketPaymentService.makePayment(accountId, adultCount * ADULT_TICKET_PRICE
+                + childCount * CHILD_TICKET_PRICE
+                + infantCount * INFANT_TICKET_PRICE);
     }
 
     private void validateTicketCounts(int adultCount, int childCount, int infantCount) {
@@ -58,7 +65,7 @@ public class TicketServiceImpl implements TicketService {
             throw new InvalidPurchaseException("Number of adults less than infants");
         } else if (adultCount == 0) { // no adults means
             throw new InvalidPurchaseException("No adult tickets purchased");
-        } else if (adultCount + childCount + infantCount > 20) {
+        } else if (adultCount + childCount + infantCount > MAX_TICKET_COUNT) {
             throw new InvalidPurchaseException("Exceeded limit on number of tickets");
         }
     }
@@ -76,7 +83,7 @@ public class TicketServiceImpl implements TicketService {
 
     private void validateTicketTypeRequests(TicketTypeRequest... ticketTypeRequests) {
         if (null == ticketTypeRequests || ticketTypeRequests.length == 0) {
-            throw new InvalidPurchaseException("Ticket request cannot be null or empty, Number of tickets cannot be less than 0");
+            throw new InvalidPurchaseException("Ticket request cannot be null or empty");
         }
         ValidWrapper<TicketTypeRequest> validWrapper = new ValidWrapper<>(ticketTypeRequests);
         Set<ConstraintViolation<ValidWrapper>> violations = validator.validate(validWrapper);

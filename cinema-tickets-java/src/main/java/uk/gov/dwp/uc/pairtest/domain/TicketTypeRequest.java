@@ -1,10 +1,8 @@
 package uk.gov.dwp.uc.pairtest.domain;
 
+import constraints.annotations.TicketType;
 import jakarta.validation.constraints.Min;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
-import constraints.annotations.TicketType;
-
-
 
 
 /**

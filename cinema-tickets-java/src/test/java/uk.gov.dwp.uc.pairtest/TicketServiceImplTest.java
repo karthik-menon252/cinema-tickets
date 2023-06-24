@@ -16,8 +16,12 @@ import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 import static org.mockito.Mockito.times;
 
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class TicketServiceImplTest {
+    private static final int ADULT_TICKET_PRICE = 20;
+    private static final int CHILD_TICKET_PRICE = 10;
+    private static final int INFANT_TICKET_PRICE = 0;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -86,7 +90,7 @@ public class TicketServiceImplTest {
         TicketTypeRequest request2 = new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 3);
         ticketService.purchaseTickets(1L, request1, request2);
         Mockito.verify(seatReservationService, times(1)).reserveSeat(1L, request1.getNoOfTickets() + request2.getNoOfTickets());
-        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, (request1.getNoOfTickets() + request2.getNoOfTickets()) * 20);
+        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, (request1.getNoOfTickets() + request2.getNoOfTickets()) * ADULT_TICKET_PRICE);
     }
 
     @Test
@@ -95,7 +99,7 @@ public class TicketServiceImplTest {
         TicketTypeRequest request2 = new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 3);
         ticketService.purchaseTickets(1L, request1, request2);
         Mockito.verify(seatReservationService, times(1)).reserveSeat(1L, 5);
-        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, request1.getNoOfTickets() * 20 + request2.getNoOfTickets() * 10);
+        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, request1.getNoOfTickets() * ADULT_TICKET_PRICE + request2.getNoOfTickets() * CHILD_TICKET_PRICE);
     }
 
     @Test
@@ -104,7 +108,17 @@ public class TicketServiceImplTest {
         TicketTypeRequest request2 = new TicketTypeRequest(TicketTypeRequest.Type.INFANT, 2);
         ticketService.purchaseTickets(1L, request1, request2);
         Mockito.verify(seatReservationService, times(1)).reserveSeat(1L, request1.getNoOfTickets());
-        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, request1.getNoOfTickets() * 20);
+        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, request1.getNoOfTickets() * ADULT_TICKET_PRICE + request2.getNoOfTickets() * INFANT_TICKET_PRICE);
+    }
+
+    @Test
+    public void testPurchaseTicketWithValidAdultChildAndInfant() {
+        TicketTypeRequest request1 = new TicketTypeRequest(TicketTypeRequest.Type.INFANT, 3);
+        TicketTypeRequest request2 = new TicketTypeRequest(TicketTypeRequest.Type.CHILD, 3);
+        TicketTypeRequest request3 = new TicketTypeRequest(TicketTypeRequest.Type.ADULT, 3);
+        ticketService.purchaseTickets(1L, request1, request2, request3);
+        Mockito.verify(seatReservationService, times(1)).reserveSeat(1L,request3.getNoOfTickets() + request2.getNoOfTickets());
+        Mockito.verify(ticketPaymentService, times(1)).makePayment(1L, request3.getNoOfTickets() * ADULT_TICKET_PRICE + request2.getNoOfTickets() * CHILD_TICKET_PRICE + request3.getNoOfTickets() * INFANT_TICKET_PRICE);
     }
 
     @Test
